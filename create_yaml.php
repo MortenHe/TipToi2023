@@ -3,7 +3,10 @@
 //Codes, YAML und GME Datei erstellen fuer Notenbuch-Prototyp
 
 //In Verzeichnis wechseln, damit dort die YAML, GME und Codes-Dateien erstellt werden
-chdir("YAML");
+//TODO: config
+$yamlDir = "C:/Users/Martin/Desktop/Nextcloud/TipToi2023/YAML";
+
+chdir($yamlDir);
 $outputName = "notenbuch.yaml";
 
 //Headerbereich der YAML-Datei
@@ -13,6 +16,7 @@ welcome: start, welcome
 gme-lang: GERMAN
 media-path: Audio/%s";
 
+//TODO: config
 //Scripts der YAML-Datei
 $data = [
   "01-das-klavier" => [
@@ -106,8 +110,8 @@ $data = [
     ["summary_notenlinien"],
     ["summary_violinschluessel"],
     ["summary_vier_viertel_takt"],
-    ["summary_notenlinie_komplett"],
     ["summary_01_fingersatz"],
+    ["summary_notenlinie_komplett", 2, "multi"],
 
     ["song_01_wo_bist_du_snail"],
     ["song_01_wo_bist_du_horse"],
@@ -115,7 +119,7 @@ $data = [
   ],
 ];
 
-//Inits fuer Scripte mit mehreren Sound Files
+//Inits fuer Scripte mit mehreren Soundfiles pro Code
 $inits = [];
 
 //Scripts erstellen
@@ -125,6 +129,7 @@ foreach ($data as $block => $blockData) {
   //Kommentar in welchem Block wir sind: #01-das-klavier
   $scripts[] = "\n  #" . $block;
 
+  //Codes pro Block erzeugen
   foreach ($blockData as $code) {
     $name = $code[0];
     $count = isset($code[1]) ? $code[1] : null;
