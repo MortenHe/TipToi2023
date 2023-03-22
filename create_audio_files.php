@@ -1,8 +1,11 @@
 <?php
 
+//TODO: config
+$audioDir = "C:/Users/Martin/Desktop/Nextcloud/TipToi2023/Musescore-audio";
+
 //Files fuer die Audio erstellt wird
 $names = [
-  //  "noten_lesen_01_1",
+  "noten_lesen_01_1",
   //  "noten_lesen_01_2",
   //  "noten_lesen_01_3",
   //  "noten_lesen_02_1",
@@ -28,8 +31,8 @@ $timeSignature = "4_4";
 foreach ($names as $name) {
 
   //Mscz -> Musicxml
-  $musicxmlPath = "Musescore-audio/Temp/" . $name . ".musicxml";
-  shell_exec("MuseScore3.exe Musescore-audio/" . $name . ".mscz -o " . $musicxmlPath);
+  $musicxmlPath = "{$audioDir}/Temp/" . $name . ".musicxml";
+  shell_exec("MuseScore3.exe {$audioDir}/" . $name . ".mscz -o " . $musicxmlPath);
 
   //Musicxml laden, hier kann man das Tempo aendern
   $domdoc = new DOMDocument();
@@ -66,32 +69,35 @@ foreach ($names as $name) {
   //Ueber Tempos einer Uebung gehen
   foreach ($tempos as $tempoName => $tempo) {
 
+    //PHP 8 $tempoTag = (DOMElement) $tempoTag;
     //Tempo-Tag auf passenden Wert setzen (z.B. 60)
-    $tempoTag->setAttribute("tempo", $tempo);
+    if ($tempoTag instanceof DOMElement) {
+      $tempoTag->setAttribute("tempo", $tempo);
+    }
 
     //musicxml-Datei mit angepasstem XML (Tempo, ggf. gemutete Instrumente) speichern
-    $tempoMusicxmlPath = "Musescore-audio/Temp/" . $name . "_" . $tempoName . ".musicxml";
+    $tempoMusicxmlPath = "{$audioDir}/Temp/" . $name . "_" . $tempoName . ".musicxml";
     $fh = fopen($tempoMusicxmlPath, "w");
     fwrite($fh, $domdoc->saveXML());
     fclose($fh);
 
     //Tempo-musicxml -> Tempo-mscz fuer mp3 Erzeugung
-    $tempoMsczlPath = "Musescore-audio/Temp/" . $name . "_" . $tempoName . ".mscz";
+    $tempoMsczlPath = "{$audioDir}/Temp/" . $name . "_" . $tempoName . ".mscz";
     shell_exec("MuseScore3.exe " . $tempoMusicxmlPath . " -o " . $tempoMsczlPath);
 
     //mp3-Erzeugung
-    $mp3Path = "Musescore-audio/Temp/" . $name . "_" . $tempoName . ".mp3";
+    $mp3Path = "{$audioDir}/Temp/" . $name . "_" . $tempoName . ".mp3";
     shell_exec("MuseScore3.exe " . $tempoMsczlPath . " -o " . $mp3Path);
 
     //countInFile + mp3-File mergen
-    $countInFile = "Musescore-audio/Count-in/" . $tempo . "_" . $timeSignature . ".mp3";
-    $finalFile = "Musescore-audio/" . $name . "_" . $tempoName . "_01.mp3";
+    $countInFile = "{$audioDir}/Count-in/" . $tempo . "_" . $timeSignature . ".mp3";
+    $finalFile = "{$audioDir}/" . $name . "_" . $tempoName . "_01.mp3";
     $mergeCommand = 'ffmpeg -y -hide_banner -loglevel panic -i "concat:' . $countInFile . '|' . $mp3Path . '" -acodec copy ' . $finalFile;
     shell_exec($mergeCommand);
   }
 }
 
 //Temp-Ordner leeren
-foreach (glob("Musescore-audio/Temp/*") as $tempFile) {
+foreach (glob("{$audioDir}/Temp/*") as $tempFile) {
   unlink($tempFile);
 }
