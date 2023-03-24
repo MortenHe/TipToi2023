@@ -5,9 +5,9 @@ $audioDir = "C:/Users/Martin/Desktop/Nextcloud/TipToi2023/Musescore-audio";
 
 //Files fuer die Audio erstellt wird
 $names = [
-  "noten_lesen_01_1",
+  //"noten_lesen_01_1",
   //"noten_lesen_01_2",
-  //  "noten_lesen_01_3",
+  "noten_lesen_01_3",
   //  "noten_lesen_02_1",
   //  "noten_lesen_02_2",
   //  "noten_lesen_02_3",
@@ -122,9 +122,9 @@ $data = [
     ["wo_bist_du", 2, "multi"],
     ["summary_01_explain"],
     ["summary_piano"],
-    ["summary_c"],
-    ["summary_d"],
-    ["summary_e"],
+    ["summary_c", 2, "multi"],
+    ["summary_d", 2, "multi"],
+    ["summary_e", 2, "multi"],
     ["summary_viertelnote"],
     ["summary_viertelpause"],
     ["summary_notenlinien"],
