@@ -5,12 +5,12 @@ $audioDir = "C:/Users/Martin/Desktop/Nextcloud/TipToi2023/Musescore-audio";
 
 //Files fuer die Audio erstellt wird
 $names = [
-  //"noten_lesen_01_1",
+  "noten_lesen_01_1",
   //"noten_lesen_01_2",
-  "noten_lesen_01_3",
-  //  "noten_lesen_02_1",
-  //  "noten_lesen_02_2",
-  //  "noten_lesen_02_3",
+  //"noten_lesen_01_3",
+  //"noten_lesen_02_1",
+  //"noten_lesen_02_2",
+  //"noten_lesen_02_3",
   //"rhythmus_01_1",
   //"rhythmus_01_2",
   //"rhythmus_01_3",
@@ -19,9 +19,22 @@ $names = [
 
 //Liste der Tempos pro Musescore Datei
 $tempos = [
-  "snail" => 60,
-  "horse" => 70,
-  "cheetah" => 80
+  //Tempo 60 => 60 / 60
+  "snail" => [
+    "value" => 60,
+    "mult" => 1
+  ],
+  //Tempo 70 => 70 / 60
+  "horse" =>
+  [
+    "value" => 70,
+    "mult" => 1.1666
+  ],
+  //Tempo 80 => 80 / 60
+  "cheetah" =>  [
+    "value" => 80,
+    "mult" => 1.3333
+  ]
 ];
 
 //Taktart
@@ -118,7 +131,7 @@ $data = [
   ],
 
   "07-wo-bist-du" => [
-    ["song_01_explain"],
+    ["song_01_explain", 2, "multi"],
     ["wo_bist_du", 2, "multi"],
     ["summary_01_explain"],
     ["summary_piano"],

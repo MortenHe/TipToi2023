@@ -1,79 +1,57 @@
 <?php
 require_once('config.php');
 
-//Audio Dateien in verschiedenen Tempi erstellen aus Musescore Dateien
+//todo chdir audiodir?
 
-//Audio erstellen
+//Audio Dateien in verschiedenen Tempi erstellen aus Musescore Dateien
 foreach ($names as $name) {
 
-  //Mscz -> Musicxml
-  $musicxmlPath = "{$audioDir}/Temp/" . $name . ".musicxml";
-  shell_exec("MuseScore3.exe {$audioDir}/" . $name . ".mscz -o " . $musicxmlPath);
+  //mscz zu xml extrahieren
+  $zip = new ZipArchive;
+  $zip->open("{$audioDir}/{$name}.mscz");
+  $zip->extractTo("{$audioDir}/Temp");
+  $zip->close();
 
-  //Musicxml laden, hier kann man das Tempo aendern
-  $domdoc = new DOMDocument();
-  $domdoc->loadXML(file_get_contents($musicxmlPath));
-  $xpath = new DOMXPath($domdoc);
-
-  //Tempo-Tag auslesen
-  $tempoTag = $xpath->query("//sound[@tempo]")->item(0);
-
-  //Lautstaerke-Tags holen (Klavier 1, Klavier 2, Gitarre, div. Percussions)
-  //$score_parts = $xpath->query("//score-part/*/volume");
-
-  /*
-    //Ueber Uebungen (z.B. rechte Hand, linke Hand) gehen
-    foreach ($project_config["rows"] as $row) {
-
-        //ID fuer Benennung der files
-        $row_id = $row["id"];
-
-        //Zunaechst allen Instrumenten die Lautstaerke 78 geben
-        foreach ($score_parts as $score_part) {
-            $score_part->nodeValue = 78;
-        }
-
-        //Wenn in dieser Uebung ein Instrument gemutet werden soll (z.B. linke Hand gemutet), ueber die Indexe der gemuteten Instrumente gehen
-        //und Lautstaerke auf 0 setzen
-        if (isset($row["mute"])) {
-            foreach ($row["mute"] as $mute_idx) {
-                $score_parts->item($mute_idx)->nodeValue = 0;
-            }
-        }
-        */
+  //XML laden, hier kann man das Tempo aendern
+  $mscxPath = "{$audioDir}/Temp/" . $name . ".mscx";
+  $xml = simplexml_load_file($mscxPath);
+  $first_tempo = $xml->xpath('//tempo')[0];
 
   //Ueber Tempos einer Uebung gehen
   foreach ($tempos as $tempoName => $tempo) {
-
-    //PHP 8 $tempoTag = (DOMElement) $tempoTag;
-    //Tempo-Tag auf passenden Wert setzen (z.B. 60)
-    if ($tempoTag instanceof DOMElement) {
-      $tempoTag->setAttribute("tempo", $tempo);
-    }
-
-    //musicxml-Datei mit angepasstem XML (Tempo, ggf. gemutete Instrumente) speichern
-    $tempoMusicxmlPath = "{$audioDir}/Temp/" . $name . "_" . $tempoName . ".musicxml";
-    $fh = fopen($tempoMusicxmlPath, "w");
-    fwrite($fh, $domdoc->saveXML());
-    fclose($fh);
-
-    //Tempo-musicxml -> Tempo-mscz fuer mp3 Erzeugung
-    $tempoMsczlPath = "{$audioDir}/Temp/" . $name . "_" . $tempoName . ".mscz";
-    shell_exec("MuseScore3.exe " . $tempoMusicxmlPath . " -o " . $tempoMsczlPath);
+    $first_tempo[0] = $tempo["mult"];
+    $xml->asXML($mscxPath);
 
     //mp3-Erzeugung
     $mp3Path = "{$audioDir}/Temp/" . $name . "_" . $tempoName . ".mp3";
-    shell_exec("MuseScore3.exe " . $tempoMsczlPath . " -o " . $mp3Path);
+    shell_exec("MuseScore4.exe " . $mscxPath . " -o " . $mp3Path);
+
+    //mp3 normalisieren
+    $mp3NormPath = "{$audioDir}/Temp/" . $name . "_" . $tempoName . "_norm.mp3";
+    shell_exec("ffmpeg -y -hide_banner -loglevel panic -i {$mp3Path} -af loudnorm -ar 44100 {$mp3NormPath}");
 
     //countInFile + mp3-File mergen
-    $countInFile = "{$audioDir}/Count-in/" . $tempo . "_" . $timeSignature . ".mp3";
-    $finalFile = "{$audioDir}/" . $name . "_" . $tempoName . "_01.mp3";
-    $mergeCommand = 'ffmpeg -y -hide_banner -loglevel panic -i "concat:' . $countInFile . '|' . $mp3Path . '" -acodec copy ' . $finalFile;
+    $countInFile = "{$audioDir}/Count-in/" . $tempo["value"] . "_{$timeSignature}.mp3";
+    $finalFile = "{$audioDir}/{$name}_{$tempoName}_01.mp3";
+    $mergeCommand = "ffmpeg -y -hide_banner -loglevel panic -i \"concat:{$countInFile}|{$mp3NormPath}\" -acodec copy {$finalFile}";
     shell_exec($mergeCommand);
   }
 }
 
-//Temp-Ordner leeren
-foreach (glob("{$audioDir}/Temp/*") as $tempFile) {
-  unlink($tempFile);
+emptyDirectory("{$audioDir}/Temp");
+
+function emptyDirectory($dir)
+{
+  $files = scandir($dir);
+  foreach ($files as $file) {
+    if ($file == '.' || $file == '..') {
+      continue;
+    }
+    if (is_file("$dir/$file")) {
+      unlink("$dir/$file");
+    } elseif (is_dir("$dir/$file")) {
+      emptyDirectory("$dir/$file");
+      rmdir("$dir/$file");
+    }
+  }
 }
