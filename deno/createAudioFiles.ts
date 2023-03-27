@@ -5,8 +5,6 @@ import { emptyDir } from "https://deno.land/std@0.74.0/fs/mod.ts";
 const audioDir = "C:/Users/Martin/Desktop/Nextcloud/TipToi2023/Musescore-audio";
 const tempDir = audioDir + "/Temp";
 
-await emptyDir(tempDir);
-
 // Files for which audio is created
 const names = [
   //"noten_lesen_01_1",
@@ -25,7 +23,12 @@ const names = [
 //TODO: expand ohne stdout
 
 // List of tempos per Musescore file
-const tempos = [
+type Tempo = {
+  name: string;
+  value: number;
+  mult: number;
+};
+const tempos: Tempo[] = [
   // Tempo 60 => 60 / 60
   { name: "snail", value: 60, mult: 1 },
   // Tempo 70 => 70 / 60
@@ -35,11 +38,11 @@ const tempos = [
 ];
 const timeSignature = "4_4";
 
-// Empty Temp dir
-//await emptyDirectory(tempDir);
+// empty temp dir
+await emptyDir(tempDir);
 
 //parallel audio file creation
-const promises: any = [];
+const promises: Promise<void>[] = [];
 for (const name of names) {
   for (const tempo of tempos) {
     promises.push(createAudio(name, tempo));
@@ -52,16 +55,17 @@ console.log("creation done");
 await emptyDir(tempDir);
 
 //unzip xml, update tempo in xml, create wav, normalize wav, combine countin and wav file
-async function createAudio(name, tempo) {
-  //update xml tempo
+async function createAudio(name: string, tempo: Tempo) {
+  //copy .mscz to .zip
   const zipPath = tempDir + "/" + name + "-" + tempo.value + ".zip";
   await Deno.copyFile(audioDir + "/" + name + ".mscz", zipPath);
 
+  //unzip Musescore.zip
   const xmlPath = tempDir + "/" + name + "-" + tempo.value;
   await unZipFromFile(zipPath, xmlPath);
 
+  //update tempo in xml
   const mscxPath = xmlPath + "/" + name + ".mscx";
-
   const fileContent = await Deno.readTextFile(mscxPath);
   const modifiedFileContent = fileContent.replace(
     /<tempo>.*<\/tempo>/,
@@ -69,12 +73,10 @@ async function createAudio(name, tempo) {
   );
   await Deno.writeTextFile(mscxPath, modifiedFileContent);
 
-  // wav generation from musescore file
+  // wav generation from musescore xml file
   const wavPath = tempDir + "/" + name + "-" + tempo.value + ".wav";
   await Deno.run({
     cmd: [
-      "cmd",
-      "/c",
       "MuseScore4.exe",
       mscxPath,
       "-o",
@@ -86,8 +88,6 @@ async function createAudio(name, tempo) {
   const wavNormPath = tempDir + "/" + name + "-" + tempo.value + "_norm.wav";
   await Deno.run({
     cmd: [
-      "cmd",
-      "/c",
       "ffmpeg",
       "-y",
       "-hide_banner",
@@ -130,8 +130,6 @@ async function createAudio(name, tempo) {
   const finalFile = audioDir + "/" + name + "_" + tempo.name + "_01.mp3";
   await Deno.run({
     cmd: [
-      "cmd",
-      "/c",
       "ffmpeg",
       "-y",
       "-hide_banner",
@@ -141,9 +139,9 @@ async function createAudio(name, tempo) {
       concatFile,
       "-vn",
       "-ar",
-      44100,
+      "44100",
       "-ac",
-      2,
+      "2",
       "-b:a",
       "128k",
       finalFile,
