@@ -1,7 +1,7 @@
 <?php
 require_once('config.php');
 
-//todo chdir audiodir?
+emptyDirectory("{$audioDir}/Temp");
 
 //Audio Dateien in verschiedenen Tempi erstellen aus Musescore Dateien
 foreach ($names as $name) {
