@@ -4,6 +4,8 @@ require_once('config.php');
 
 //Codes, YAML und GME Datei erstellen fuer Notenbuch-Prototyp
 
+//TODO: find unneeded mp3
+
 //In Verzeichnis wechseln, damit dort die YAML, GME und Codes-Dateien erstellt werden
 chdir($yamlDir);
 $outputName = "notenbuch.yaml";
