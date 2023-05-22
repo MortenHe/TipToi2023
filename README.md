@@ -1,5 +1,9 @@
 # TipToi2023
 
-php create_audio_files.php
+php createAudioFiles.php (über Powershell, nicht parallelisiert)
+createAudioFiles.js (über Deno parallelisiert)
 
-php create_yaml.php
+Erzeugte Audiodateien aus Musescore-audio nach YAML/Audio schieben
+
+php createYaml.php (über Powershell)
+createYamls.ts (über Deno)

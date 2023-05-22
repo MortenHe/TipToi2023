@@ -5,16 +5,16 @@ $audioDir = "C:/Users/Martin/Desktop/Nextcloud/TipToi2023/Musescore-audio";
 
 //Files fuer die Audio erstellt wird
 $names = [
-  "noten_lesen_01_1",
+  //"noten_lesen_01_1",
   //"noten_lesen_01_2",
   //"noten_lesen_01_3",
   //"noten_lesen_02_1",
   //"noten_lesen_02_2",
   //"noten_lesen_02_3",
   //"rhythmus_01_1",
-  //"rhythmus_01_2",
-  //"rhythmus_01_3",
-  //"song_01_wo_bist_du",
+  "rhythmus_01_2",
+  "rhythmus_01_3",
+  "song_01_wo_bist_du",
 ];
 
 //Liste der Tempos pro Musescore Datei

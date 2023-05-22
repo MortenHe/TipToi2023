@@ -19,6 +19,7 @@ foreach ($names as $name) {
 
   //Ueber Tempos einer Uebung gehen
   foreach ($tempos as $tempoName => $tempo) {
+    echo "create {$name} - {$tempo['value']}\n";
     $first_tempo[0] = $tempo["mult"];
     $xml->asXML($mscxPath);
 
