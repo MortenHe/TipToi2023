@@ -3,6 +3,9 @@ require_once('config.php');
 
 emptyDirectory("{$audioDir}/Temp");
 
+//Signalton vor Einzaehler
+$preCountInFile = "{$audioDir}/Count-in/pre_count_in.mp3";
+
 //Audio Dateien in verschiedenen Tempi erstellen aus Musescore Dateien
 foreach ($names as $name) {
 
@@ -39,10 +42,10 @@ foreach ($names as $name) {
     $finalFile = "{$audioDir}/{$name}_{$tempoName}_01.mp3";
 
     //merge Command fuer ffmpeg (bis 06.23)
-    //$mergeCommand = "ffmpeg -y -hide_banner -loglevel panic -i \"concat:{$countInFile}|{$mp3NormPath}\" -acodec copy {$finalFile}";
+    //$mergeCommand = "ffmpeg -y -hide_banner -loglevel panic -i \"concat:{$preCountInFile}|{$countInFile}|{$mp3NormPath}\" -acodec copy {$finalFile}";
 
     //merge Command fuer mp3gain (ab 06.23)
-    $mergeCommand = "ffmpeg -y -hide_banner -loglevel panic -i \"concat:{$countInFile}|{$mp3Path}\" -acodec copy {$finalFile}";
+    $mergeCommand = "ffmpeg -y -hide_banner -loglevel panic -i \"concat:{$preCountInFile}|{$countInFile}|{$mp3Path}\" -acodec copy {$finalFile}";
     shell_exec($mergeCommand);
   }
 }
